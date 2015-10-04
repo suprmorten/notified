@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title></title>
+        <script src="Scripts/jquery-1.6.4.min.js"></script>
+        <script src="Scripts/jquery.signalR-2.2.0.min.js"></script>
+        <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.1.0.js"></script>
+        <script type="text/javascript" src="signalr/hubs"></script>
+        <script type="text/javascript">
+            function MessageViewModel() {
+                var self = this;
+                self.items = ko.observableArray();
+
+                self.add = function(message) {
+                    self.items.push({ message: message });
+                }
+            };
+
+            $(function () {
+                var viewModel = new MessageViewModel(),
+                    hub = $.connection.notify;
+
+                ko.applyBindings(viewModel);
+
+                hub.client.message = function (message) {
+                    viewModel.add(message);
+                };
+
+                $.connection.hub.start();
+            });
+        </script>
+    </head>
+    <body>
+        <section data-bind="visible: items().length < 1">
+            <h1>Nothing received yet...</h1>
+        </section>
+        <section data-bind="visible: items().length > 0" style="display: none">
+            <h1>Received messages</h1>
+            <table data-bind="foreach: items">
+                <tr>
+                    <td><span data-bind="text: message"></span></td>
+                </tr>
+            </table>
+        </section>
+    </body>
+</html>
